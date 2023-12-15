@@ -9,6 +9,30 @@ const fs = require('fs');
 // devo anche controllare che il file sia nella cartella node_modules (altrimenti non lo trova e devo inserire il path completo)
 const sp = require('spesa');
 
+const dispatcher = require('dispatcher');
+const d = new dispatcher();
+
+let header;
+
+// oppure potrei anche fare const dispatcher = new require('dispatcher');
+
+// creazione del servizio saluto attraverso la funzione addServizio del dispatcher
+d.addServizio('/saluto', (richiesta, risposta) => {
+    header = {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'text/plain'
+    };
+
+    risposta.writeHead(200, header);
+    risposta.write('salve mondo');
+    risposta.end();
+});
+
+// creazione del servizio initClasse attraverso la funzione addServizio del dispatcher (in questo caso il servizio è una funzione)
+d.addServizio('/initClasse', () => {
+    initClasse(richiesta, risposta);
+});
+
 var server = http.createServer(gestisciRichieste);
 server.listen(1337);
 console.log('server in ascolto sulla porta 1337');
@@ -18,7 +42,7 @@ function gestisciRichieste(richiesta, risposta){
 
     console.log(info.pathname);
 
-    let header;
+
     let file;
 
     switch(info.pathname){
@@ -51,33 +75,22 @@ function gestisciRichieste(richiesta, risposta){
 
             break;
 
-        case '/saluto':
-            header = {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'text/plain'
-            };
-
-            risposta.writeHead(200, header);
-            risposta.write('salve mondo');
-            risposta.end();
-
-            break;
-
-        case '/initClasse':
-            let s = new sp('lidl', 50, 'pippo');
-
-            header = {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'text/plain'
-            };
-
-            // fare lo stringify dell'oggetto s è un problema perché non riporta le proprietà private e le funzioni
-            risposta.writeHead(200, header);
-            risposta.write(s.toString());
-            risposta.end();
-
         default:
-
+            d.smista(info.pathname, richiesta, risposta);
             break;
     }   
+}
+
+function initClasse(richiesta, risposta){
+    let s = new sp('lidl', 50, 'pippo');
+
+    let header = {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'text/plain'
+    };
+
+    // fare lo stringify dell'oggetto s è un problema perché non riporta le proprietà private e le funzioni
+    risposta.writeHead(200, header);
+    risposta.write(s.toString());
+    risposta.end();
 }
