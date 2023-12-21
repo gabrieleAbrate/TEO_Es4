@@ -1,4 +1,4 @@
-window.onload = () => {
+window.onload = async () => {
     /* 
         eseguissi questa chiamata da un altro dominio,
         il browser bloccherebbe la richiesta per motivi di sicurezza (CORS)
